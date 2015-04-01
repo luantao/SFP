@@ -1,5 +1,5 @@
 /* 
- * File:   SoctetLockService.c
+ * File:   main.c
  * Author: 栾涛 <286976625@qq.com>
  *
  * Created on 2015年3月26日, 下午4:11
@@ -16,6 +16,7 @@
 #define CONNECT_SIGNAL "ok"
 #define QUEUE_HEADER "_queue_header"
 #define KEY_MAX_LEN 100
+#define PORT 8888
 
 typedef struct _queue_unit {
     int socket_num;
@@ -80,13 +81,24 @@ int main(int argc, char** argv) {
     queue_unit use_list, wait_list, *use_p, *wait_p;
     init_queue(&use_list);
     init_queue(&wait_list);
-    int sfp, cfp, len, sel, i, client_fd[FD_SETSIZE] = {0}, temp;
+    int opt, sfp, cfp, len, sel, i, client_fd[FD_SETSIZE] = {0}, temp, port = PORT;
     struct sockaddr_in client_sockaddr, service_sockaddr;
     char buf[1024];
+    while ((opt = getopt(argc, argv, "hp:")) != -1) {
+        switch (opt) {
+            case 'p':port = atoi(optarg);
+                break;
+            case 'h':
+            default:
+                printf("Welcome to use SocketLock For PHP\n"
+                        "-h\t\t\t help \n"
+                        "-p\t\t\t listen port\n");
+        }
+    }
     sfp = socket(AF_INET, SOCK_STREAM, 0);
     service_sockaddr.sin_addr.s_addr = htonl(INADDR_ANY);
     service_sockaddr.sin_family = AF_INET;
-    service_sockaddr.sin_port = htons(8888);
+    service_sockaddr.sin_port = htons(port);
     if (-1 == bind(sfp, (struct sockaddr *) &service_sockaddr, sizeof (struct sockaddr))) {
         perror("bind error");
         exit(EXIT_FAILURE);
@@ -142,7 +154,7 @@ int main(int argc, char** argv) {
                         close(i);
                         del_queue(&use_list, i, buf); //删除在用队列里的数据
                         printf("close: %d %s\n", i, buf);
-                        
+
                         use_p = find_in_queue(&wait_list, buf); //查找等待队列中是否有数据
                         if (use_p != NULL) {//如果有等待
                             temp = use_p->socket_num;
