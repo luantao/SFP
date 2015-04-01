@@ -47,4 +47,8 @@ class CacheLock {
 		}
 	}
 
+	public function __destruct()
+	{
+		$this->unlock();
+	}
 }
