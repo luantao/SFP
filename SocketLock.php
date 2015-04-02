@@ -5,7 +5,7 @@
  *
  * @author 栾涛 <286976625@qq.com>
  */
-class CacheLock {
+class SocketLock {
 
 	private $host;
 	private $port;
