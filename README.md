@@ -12,3 +12,8 @@ $cacheLock->lock('key');
 $cacheLock->unlock();
 
 ```
+
+## 其他说明
+
+由于windows下cygwin不支持epoll,用select实现
+如果在linux下,根据自己的需求,可以将select换成epoll方式提高连接数量级
