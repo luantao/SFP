@@ -6,7 +6,7 @@ SocketLock For PHP (高并发网络锁 For PHP)
 ```php
 <?php
 
-$cacheLock = new CacheLock();
+$cacheLock = new SocketLock();
 $cacheLock->lock('key');
 ......需要被锁定执行的代码
 $cacheLock->unlock();
