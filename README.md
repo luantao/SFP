@@ -20,3 +20,9 @@ $cacheLock->unlock();
 由于windows下cygwin不支持epoll,用select实现
 
 如果在linux下,根据自己的需求,可以将select换成epoll方式提高连接数量级
+
+## 后期版本目标
+
+* 释放死锁
+* 哈希索引
+* 分布式实现
