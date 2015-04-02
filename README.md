@@ -1,6 +1,8 @@
 # SFP
 SocketLock For PHP (高并发网络锁 For PHP)
 
+多台服务器间通信,文件锁和内存锁的替代方案
+
 # 使用方法
 
 ```php
