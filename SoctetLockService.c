@@ -12,20 +12,8 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <string.h>
-
-#define CONNECT_SIGNAL "ok"
-#define QUEUE_HEADER "_queue_header"
-#define KEY_MAX_LEN 100
-#define PORT 8888
-
-typedef struct _queue_unit {
-    int socket_num;
-    char key[KEY_MAX_LEN];
-    struct _queue_unit *next;
-    struct _queue_unit *pre;
-} queue_unit;
-
-#define UNIT_NEW (queue_unit *)malloc(sizeof(queue_unit))
+#include <signal.h> 
+#include "SocketLockService.h"
 
 queue_unit init_queue(queue_unit *init_unit) {
     init_unit->socket_num = 0;
@@ -77,11 +65,22 @@ void echo_queue(queue_unit *unit) {
     }
 }
 
+int sigroutine(int signum) {
+    int i;
+    for (i = 0; i < MAX_NUM; i++) {
+        if (client_fd[i] == 1) {
+            close(i);
+        }
+    }
+    close(sfp);
+    exit(EXIT_SUCCESS);
+}
+
 int main(int argc, char** argv) {
     queue_unit use_list, wait_list, *use_p, *wait_p;
     init_queue(&use_list);
     init_queue(&wait_list);
-    int opt, sfp, cfp, len, sel, i, client_fd[FD_SETSIZE] = {0}, temp, port = PORT;
+    int opt, cfp, len, sel, i, temp, port = PORT;
     struct sockaddr_in client_sockaddr, service_sockaddr;
     char buf[1024];
     while ((opt = getopt(argc, argv, "hp:")) != -1) {
@@ -95,6 +94,8 @@ int main(int argc, char** argv) {
                         "-p\t\t\t listen port\n");
         }
     }
+    signal(SIGQUIT, sigroutine);
+    signal(SIGKILL, sigroutine);
     sfp = socket(AF_INET, SOCK_STREAM, 0);
     service_sockaddr.sin_addr.s_addr = htonl(INADDR_ANY);
     service_sockaddr.sin_family = AF_INET;
@@ -104,7 +105,7 @@ int main(int argc, char** argv) {
         exit(EXIT_FAILURE);
     }
     printf("bind success!\n");
-    if (-1 == listen(sfp, FD_SETSIZE)) {
+    if (-1 == listen(sfp, MAX_NUM)) {
         perror("listen error");
         exit(EXIT_FAILURE);
     }
@@ -115,11 +116,11 @@ int main(int argc, char** argv) {
     FD_ZERO(&bufset);
     FD_SET(sfp, &readset);
     struct timeval tm;
-    tm.tv_sec = 5;
-    tm.tv_usec = 0;
     while (1) {
+        tm.tv_sec = 5;
+        tm.tv_usec = 0;
         memcpy(&bufset, &readset, sizeof (fd_set));
-        sel = select(FD_SETSIZE + 1, &bufset, NULL, NULL, &tm);
+        sel = select(MAX_NUM + 1, &bufset, NULL, NULL, &tm);
         if (sel < 0) {
             perror("select error");
             exit(EXIT_FAILURE);
@@ -144,7 +145,7 @@ int main(int argc, char** argv) {
             printf("client success %d \n", cfp);
         }
 
-        for (i = 0; i < FD_SETSIZE; i++) {
+        for (i = 0; i < MAX_NUM; i++) {
             if (FD_ISSET(i, &bufset)) {
                 if (client_fd[i] == 1) {
                     len = read(i, buf, 1024);
