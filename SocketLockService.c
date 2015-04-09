@@ -21,7 +21,7 @@ int init_queue(queue_unit *init_unit) {
         return -1;
     } else {
         init_unit->socket_num = 0;
-        strncpy(init_unit->key, QUEUE_HEADER,KEY_MAX_LEN);
+        strcpy(init_unit->key, QUEUE_HEADER);
         init_unit->next = NULL;
         init_unit->pre = NULL;
         return 0;
