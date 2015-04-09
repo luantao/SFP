@@ -16,11 +16,15 @@
 #include <signal.h> 
 #include "SocketLockService.h"
 
-queue_unit init_queue(queue_unit *init_unit) {
-    init_unit->socket_num = 0;
-    strcpy(init_unit->key, QUEUE_HEADER);
-    init_unit->next = NULL;
-    init_unit->pre = NULL;
+int init_queue(queue_unit *init_unit) {
+    if (init_unit == NULL) {
+        return -1;
+    } else {
+        init_unit->socket_num = 0;
+        strcpy(init_unit->key, QUEUE_HEADER);
+        init_unit->next = NULL;
+        init_unit->pre = NULL;
+        return 0;
 }
 
 queue_unit* find_in_queue(queue_unit *unit, char *key) {
@@ -79,8 +83,14 @@ int sigroutine(int signum) {
 
 int main(int argc, char** argv) {
     queue_unit use_list, wait_list, *use_p, *wait_p;
-    init_queue(&use_list);
-    init_queue(&wait_list);
+    if (init_queue(&use_list) == -1) {
+        printf("use Queue Initialization failed");
+        exit(EXIT_FAILURE);
+    }
+    if (init_queue(&wait_list) == -1) {
+        printf("wait Queue Initialization failed");
+        exit(EXIT_FAILURE);
+    }
     int opt, cfp, len, sel, i, temp, port = PORT;
     int keepAlive = 1; // 开启keepalive属性
     int keepIdle = 5; // 如该连接在5秒内没有任何数据往来,则进行探测 
