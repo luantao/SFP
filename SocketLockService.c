@@ -21,7 +21,7 @@ int init_queue(queue_unit *init_unit) {
         return -1;
     } else {
         init_unit->socket_num = 0;
-        strcpy(init_unit->key, QUEUE_HEADER);
+        strncpy(init_unit->key, QUEUE_HEADER,KEY_MAX_LEN);
         init_unit->next = NULL;
         init_unit->pre = NULL;
         return 0;
@@ -41,7 +41,7 @@ queue_unit* add_queue(queue_unit *unit, int cfp, char *key) {
         unit->next->pre = unit;
         unit->next->socket_num = cfp;
         unit->next->next = NULL;
-        strcpy(unit->next->key, key);
+        strncpy(unit->next->key, key,KEY_MAX_LEN);
         return unit->next;
     } else {
         return add_queue(unit->next, cfp, key);
@@ -51,7 +51,7 @@ queue_unit* add_queue(queue_unit *unit, int cfp, char *key) {
 char* del_queue(queue_unit *unit, int cfp, char *buf) {
     if (unit != NULL) {
         if (unit->socket_num == cfp) {
-            strcpy(buf, unit->key);
+            strncpy(buf, unit->key,KEY_MAX_LEN);
             unit->pre->next = unit->next;
             if (unit->next != NULL) {
                 unit->next->pre = unit->pre;
