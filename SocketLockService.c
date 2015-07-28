@@ -25,7 +25,7 @@ int init_queue(queue_unit *init_unit) {
         init_unit->next = NULL;
         init_unit->pre = NULL;
         return 0;
-}
+}}
 
 queue_unit* find_in_queue(queue_unit *unit, char *key) {
     if (unit == NULL || strcmp(unit->key, key) == 0) {
@@ -70,7 +70,7 @@ void echo_queue(queue_unit *unit) {
     }
 }
 
-int sigroutine(int signum) {
+void sigroutine(int signum) {
     int i;
     for (i = 0; i < MAX_NUM; i++) {
         if (client_fd[i] == 1) {
